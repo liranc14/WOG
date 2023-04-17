@@ -1,10 +1,9 @@
 from base_game import WOG
 import random
 from time import sleep
-from currency_converter import CurrencyConverter
 import os
 import platform
-
+import requests
 
 
 class GuessGame(WOG):
@@ -87,13 +86,20 @@ class MemoryGame(WOG):
 class CurrencyRoulette(WOG):
     def __init__(self) -> None:
         super().__init__()
-
+        self.dollar = random.randint(1, 101)
 
 
     def get_amounts(self):
-        self.dollar = random.randint(1, 101)
-        c = CurrencyConverter()
-        self.shekel = c.convert(self.dollar, 'USD', 'ILS')
+        to_cur = "ILS"
+        from_cur = "USD"
+        
+        with open('/home/e186601/DevOps2702/WOG/access_key', 'r') as f:
+            ACCESS_KEY = f.read()
+
+        url = f"https://api.apilayer.com/fixer/latest?base={from_cur}&symbols={to_cur}&apikey={ACCESS_KEY}"
+        data = requests.get(url).json()
+        rate = data["rates"][to_cur]
+        self.shekel = rate * self.dollar
 
 
     def get_guess_from_user(self):
